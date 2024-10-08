@@ -26,7 +26,9 @@ app.use(express.json())
 
 app.use(fileUpload());
 
-app.use(methodOverride('_method'))
+app.use(methodOverride('_method', {
+    methods: ["POST", "GET"]
+}))
 
 //Routes
 app.get("/", async (req, res) => {
@@ -83,6 +85,14 @@ app.put("/photos/:id", async (req, res) => {
     photo.save()
 
     res.redirect(`/photos/${req.params.id}`)
+})
+
+app.delete("/photos/:id", async (req, res) => {
+    const photo = await Photo.findOne({ _id: req.params.id })
+    let deletedImage = __dirname + "/public" + photo.image
+    fs.unlinkSync(deletedImage)
+    await Photo.findByIdAndDelete(req.params.id)
+    res.redirect("/")
 })
 
 const port = 3000
